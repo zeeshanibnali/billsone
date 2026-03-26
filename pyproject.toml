@@ -5,7 +5,9 @@ description = "Billing Storage and Retreival System"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "fastapi>=0.135.2",
     "ruff>=0.15.7",
+    "uvicorn>=0.42.0",
 ]
 
 [project.scripts]
