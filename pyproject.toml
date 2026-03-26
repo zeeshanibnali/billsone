@@ -14,6 +14,18 @@ start = "main:main"
 [tool.uv]
 package = true 
 
+[tool.ruff]
+exclude = [
+    "uv.lock",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+]
+
+[tool.ruff.format]
+exclude = ["uv.lock"]
+
 [dependency-groups]
 dev = [
     "pre-commit>=4.5.1",
