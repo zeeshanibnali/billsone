@@ -10,3 +10,6 @@ dependencies = [
 
 [project.scripts]
 start = "main:main"
+
+[tool.uv]
+package = true 
