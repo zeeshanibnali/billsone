@@ -1,7 +1,7 @@
 [project]
-name = "example"
+name = "billsone"
 version = "0.1.0"
-description = "Add your description here"
+description = "Billing Storage and Retreival System"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
