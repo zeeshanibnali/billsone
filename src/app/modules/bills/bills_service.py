@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import Any, Dict, Optional
 
 from fastapi import HTTPException
@@ -71,8 +72,8 @@ def _serialize_bill(bill: BillEntity) -> Dict[str, Any]:
 def fetch_bills_paginated(
     *,
     reference: Optional[str] = None,
-    total_from: Optional[float] = None,
-    total_to: Optional[float] = None,
+    total_from: Optional[Decimal] = None,
+    total_to: Optional[Decimal] = None,
     skip: int = 0,
     limit: int = 50,
 ) -> Dict[str, Any]:

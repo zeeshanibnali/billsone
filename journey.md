@@ -20,3 +20,5 @@ Logging Service setup is required for future monitoring.
 Lemme add env validations and checks, as missing vars some times bring in frustrating debugging time.
 
 Lemme add handling for escape LIKE literals % and __
+
+Lemme check the schema and handle all the scalability aspects.

@@ -1,6 +1,8 @@
-from typing import Optional
+from decimal import Decimal
+from typing import Annotated, Optional
 
 from fastapi import APIRouter, Query
+from pydantic import Field
 
 from app.core.logger import get_logger
 from app.modules.bills.bills_constants import (
@@ -34,7 +36,7 @@ def _normalize_reference_filter(reference: Optional[str]) -> Optional[str]:
         "Paginate **bills** (skip/limit apply to bill rows). "
         "Optional filter by sub-bill reference substring (case-insensitive): only bills with at least "
         "one matching sub-bill are listed, and each bill includes **only** matching sub-bills. "
-        "Optional total_from / total_to filter bill total (inclusive). "
+        "Optional total_from / total_to filter bill total (inclusive); parsed as Decimal to match storage. "
         "Ordered by bill created_at (newest first), then id."
     ),
 )
@@ -46,14 +48,32 @@ def read_bills(
             "Only matching sub-bills are returned per bill."
         ),
     ),
-    total_from: Optional[float] = Query(
-        default=None,
-        description="Returns bills with totals greater than or equal to the specified value.",
-    ),
-    total_to: Optional[float] = Query(
-        default=None,
-        description="Returns bills with totals lesser than or equal to the specified value.",
-    ),
+    total_from: Annotated[
+        Optional[Decimal],
+        Field(
+            default=None,
+            ge=Decimal("0"),
+            max_digits=18,
+            decimal_places=4,
+            description=(
+                "Minimum bill total (inclusive). Parsed as a decimal; same precision as bill totals."
+            ),
+        ),
+        Query(),
+    ] = None,
+    total_to: Annotated[
+        Optional[Decimal],
+        Field(
+            default=None,
+            ge=Decimal("0"),
+            max_digits=18,
+            decimal_places=4,
+            description=(
+                "Maximum bill total (inclusive). Parsed as a decimal; same precision as bill totals."
+            ),
+        ),
+        Query(),
+    ] = None,
     skip: int = Query(
         0,
         ge=0,

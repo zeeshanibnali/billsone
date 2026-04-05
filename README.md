@@ -89,8 +89,8 @@ After setup, run the API with `uv run start` (see step 6 above). Default: `http:
   - **Which sub-bills appear:** For each such bill, **`sub_bills` contains only the sub-bills that match** the substring (non-matching line items on that bill are omitted from the response).
   - If the query parameter `reference` is omitted (or empty after trim), each bill includes **all** of its sub-bills, including line items where `reference` is null (`"reference": null` in JSON).
   - When the `reference` filter **is** applied, rows with `reference` NULL never match and are omitted from each bill’s `sub_bills` list for that response. Characters `%`, `_`, and `\` in the query parameter are treated as **literal** text (not SQL `LIKE` wildcards). An empty or whitespace-only value is treated as **no** reference filter (same as omitting the parameter).
-- **`total_from`** — Minimum bill `total` (**inclusive**): only bills with `total >= total_from`.
-- **`total_to`** — Maximum bill `total` (**inclusive**): only bills with `total <= total_to`.
+- **`total_from`** — Minimum bill `total` (**inclusive**): only bills with `total >= total_from`. Parsed as a **decimal** (not a float), aligned with `NUMERIC(18,4)` storage.
+- **`total_to`** — Maximum bill `total` (**inclusive**): only bills with `total <= total_to`. Same decimal parsing as `total_from`.
 
 ### `GET /bills` query parameters (all optional except pagination defaults)
 

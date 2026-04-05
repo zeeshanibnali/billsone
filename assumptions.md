@@ -11,7 +11,7 @@
 
 5. **Reference size** — `reference` is capped at **10** characters (API validation and `VARCHAR(10)` in PostgreSQL). Migrating from a longer `VARCHAR(128)` may **truncate** existing values to 10 characters (`left(trim(reference), 10)` in the migration); plan backups accordingly.
 
-6. **Money representation** — Bill totals and sub-bill amounts are stored as `NUMERIC(18,4)` and modeled as `Decimal` in the API. **JSON encoding:** Pydantic v2 (used by FastAPI) encodes `Decimal` as a **JSON string**, not a number, so values are not rounded to binary floats. That is intentional for money. (JSON has no native decimal type; strings preserve exact values.)
+6. **Money representation** — Bill totals and sub-bill amounts are stored as `NUMERIC(18,4)` and modeled as `Decimal` in the API. **JSON encoding:** Pydantic v2 (used by FastAPI) encodes `Decimal` as a **JSON string**, not a number, so values are not rounded to binary floats. That is intentional for money. (JSON has no native decimal type; strings preserve exact values.) API consumers should parse those strings as decimals, not assume JSON numbers for money fields.
 
 7. **Payload limits** — At most **500** sub-bills per create request (`MAX_SUB_BILLS_PER_BILL` in `bills_constants.py`). Exceeding this returns **422** (Pydantic validation and a service-level check). Adjust the constant if product needs change.
 
@@ -28,3 +28,11 @@
 13. **Errors** — Validation issues → **422**. Reference uniqueness conflicts → **409**. Unhandled server failures → **500** with a generic message (details logged server-side).
 
 14. **Response shape** — Example JSON in the original brief sometimes omitted `id` fields; this API always returns stable UUID `id` values for bills and sub-bills, plus the audit timestamps above.
+
+15. **`total_from` / `total_to` query types** — These optional query parameters are validated and parsed as **`Decimal`** (same `max_digits` / `decimal_places` as stored money), then compared to `NUMERIC` in SQL—no binary-float boundary ambiguity for filters.
+
+16. **Rate limiting and reverse proxies** — Per-IP limits use the **direct TCP client address** (`slowapi` + `get_remote_address`). Behind a reverse proxy or load balancer, all traffic can appear to come from one IP unless the ASGI stack is configured to trust **`X-Forwarded-For`** (or similar) and expose the real client IP. Unmatched routes (e.g. **404**), where the framework does not resolve a view handler, are **not** rate-limited by `slowapi` middleware (library behavior).
+
+17. **Alembic downgrades** — Some migrations (e.g. major schema steps) intentionally **do not support `downgrade`** or are destructive; treat production rollback as **restore from backup** or forward-fix, not `alembic downgrade`.
+
+18. **Automated tests** — There is **no pytest (or similar) suite** in this repository yet. Behavior is validated manually and via OpenAPI `/docs`. Adding API tests would reduce regression risk for filters, totals, and conflict paths.
