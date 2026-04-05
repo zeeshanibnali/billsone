@@ -1,28 +1,36 @@
-from app.database.base import Base
-from app.database.engine import engine, SessionLocal
-from app.modules.bills.bills_entity import BillEntity
+import os
+
+from app.core.logger import get_logger
+from app.database.engine import SessionLocal
+from app.database.seeder import seed_db
 
 
-def init_db():
-    print("\n🚀 Initializing DB...")
+logger = get_logger(__name__)
 
-    # Step 2: create table
-    Base.metadata.create_all(bind=engine)
-    print("✅ Table created")
+
+def _seed_dummy_data_enabled() -> bool:
+    raw = os.getenv("SEED_DUMMY_DATA", "")
+    return str(raw).strip().lower() in ("1", "true", "yes")
+
+
+def init_db() -> None:
+    """
+    Optionally seed demo rows when the database is empty.
+
+    Seeding runs only if ``SEED_DUMMY_DATA`` is truthy (see README).
+
+    Apply schema changes with Alembic: ``uv run alembic upgrade head``
+    (before deploy or on first setup).
+    """
+    logger.info("Initializing database...")
+
+    if not _seed_dummy_data_enabled():
+        logger.info("SEED_DUMMY_DATA not enabled; skipping demo seed")
+        return
 
     db = SessionLocal()
-
-    # Step 3: insert bill
-    new_bill = BillEntity(total=500)
-    db.add(new_bill)
-    db.commit()
-    print("✅ Inserted bill")
-
-    # Step 4: query all bills
-    bills = db.query(BillEntity).all()
-
-    print("📄 Bills in DB:")
-    for b in bills:
-        print(f"id={b.id}, total={b.total}")
-
-    db.close()
+    try:
+        seed_db(db)
+        logger.info("Dummy data seeded (if database was empty)")
+    finally:
+        db.close()

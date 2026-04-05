@@ -5,9 +5,14 @@ description = "Billing Storage and Retreival System"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "alembic>=1.14.0",
     "fastapi>=0.135.2",
+    "psycopg[binary]>=3.2.0",
+    "python-dotenv>=1.0.0",
     "ruff>=0.15.7",
+    "slowapi>=0.1.9",
     "sqlalchemy>=2.0.48",
+    "structlog>=25.5.0",
     "uvicorn>=0.42.0",
 ]
 

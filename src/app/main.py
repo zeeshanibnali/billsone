@@ -1,27 +1,31 @@
-from fastapi import FastAPI
+"""ASGI entry: logging, app instance, and dev server when run as a script."""
+
 import uvicorn
 
-from app.database.init import init_db  # 👈 import this
-from app.modules.bills.bills_controller import router as bill_router
+from app.core.env import get_uvicorn_settings
+from app.core.logger import get_logger, setup_logging
+from app.factory import create_app
 
-app = FastAPI()
+setup_logging()
+logger = get_logger(__name__)
 
-
-@app.on_event("startup")
-def startup():
-    init_db()  # 👈 runs every time server starts
-
-
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
+app = create_app()
 
 
-app.include_router(bill_router)
-
-
-def main():
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+def main() -> None:
+    settings = get_uvicorn_settings()
+    logger.info(
+        "Running development server with uvicorn",
+        host=settings.host,
+        port=settings.port,
+        reload=settings.reload,
+    )
+    uvicorn.run(
+        "app.main:app",
+        host=settings.host,
+        port=settings.port,
+        reload=settings.reload,
+    )
 
 
 if __name__ == "__main__":

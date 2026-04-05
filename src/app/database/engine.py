@@ -1,24 +1,13 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
-from app.modules.bills.bills_entity import BillEntity
 
-# In-memory SQLite
-DATABASE_URL = "sqlite+pysqlite:///:memory:"
+from app.database.config import DATABASE_URL
 
+# Evaluate CURRENT_TIMESTAMP / now() in UTC so server-side defaults match app-side UTC.
 engine = create_engine(
     DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,  # 🔥 keeps DB alive
+    pool_pre_ping=True,
+    connect_args={"options": "-c timezone=UTC"},
 )
 
 SessionLocal = sessionmaker(bind=engine)
-
-
-def get_all_bills():
-    db = SessionLocal()
-    try:
-        bills = db.query(BillEntity).all()
-        return bills
-    finally:
-        db.close()
